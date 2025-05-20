@@ -2,17 +2,22 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-# ติดตั้ง Docker
-RUN apt-get update && apt-get install -y docker.io curl gnupg
+# ติดตั้ง Docker CLI และเครื่องมืออื่น ๆ
+RUN apt-get update && apt-get install -y \
+    docker.io \
+    curl \
+    gnupg \
+    lsb-release \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
 
-# ติดตั้ง Node.js (v18)
+# ติดตั้ง Node.js v18 และ Firebase CLI
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y nodejs && \
+    npm install -g firebase-tools
 
-# ติดตั้ง Firebase CLI
-RUN npm install -g firebase-tools
-
-# ให้ Jenkins ใช้ Docker ได้
+# ให้สิทธิ์ Jenkins รัน docker
 RUN usermod -aG docker jenkins
 
 USER jenkins
