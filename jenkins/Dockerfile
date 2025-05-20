@@ -2,23 +2,17 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-# ติดตั้ง Docker CLI และเครื่องมืออื่น ๆ
-RUN apt-get update && apt-get install -y \
-    docker.io \
-    curl \
-    gnupg \
-    lsb-release \
-    apt-transport-https \
-    ca-certificates \
-    software-properties-common
+# ติดตั้ง Docker CLI
+RUN apt-get update && \
+    apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+    $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && \
+    apt-get install -y docker-ce-cli docker-compose-plugin
 
-# ติดตั้ง Node.js v18 และ Firebase CLI
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g firebase-tools
+# ให้ user jenkins ใช้ docker ได้ (โดยไม่ต้องเป็น root)
+RUN groupadd -f docker && usermod -aG docker jenkins
 
-# ให้สิทธิ์ Jenkins รัน docker
-RUN usermod -aG docker jenkins
-RUN getent group docker || groupadd docker && usermod -aG docker jenkins
-
+# กลับไปใช้ user jenkins
 USER jenkins
