@@ -1,22 +1,93 @@
 pipeline {
-    agent any
-    stages {
-        stage('Build Frontend and Services') {
-            steps {
-                sh 'docker-compose build frontend user-service recipe-service rating-service favorite-service api-gateway reverse-proxy'
-            }
-        }
+  agent any
 
-        stage('Start Containers') {
-            steps {
-                sh 'docker-compose up -d frontend user-service recipe-service rating-service favorite-service api-gateway reverse-proxy'
-            }
-        }
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // ต้องตั้งชื่อ credentials นี้ใน Jenkins
+    DOCKERHUB_USERNAME = 'martinnezsavemaiwai' // ← แก้ตรงนี้ด้วย!
+  }
 
-        stage('Check Status') {
-            steps {
-                sh 'docker ps'
-            }
+  stages {
+    stage('Docker Login') {
+      steps {
+        script {
+          sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
         }
+      }
     }
+
+    stage('Build & Push Images') {
+      parallel {
+        stage('user-service') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/user-service:latest ./user-service
+              docker push $DOCKERHUB_USERNAME/user-service:latest
+            """
+          }
+        }
+        stage('recipe-service') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/recipe-service:latest ./recipe-service
+              docker push $DOCKERHUB_USERNAME/recipe-service:latest
+            """
+          }
+        }
+        stage('rating-service') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/rating-service:latest ./rating-service
+              docker push $DOCKERHUB_USERNAME/rating-service:latest
+            """
+          }
+        }
+        stage('favorite-service') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/favorite-service:latest ./favorite-service
+              docker push $DOCKERHUB_USERNAME/favorite-service:latest
+            """
+          }
+        }
+        stage('api-gateway') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/api-gateway:latest ./api-gateway
+              docker push $DOCKERHUB_USERNAME/api-gateway:latest
+            """
+          }
+        }
+        stage('frontend') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/frontend:latest ./frontend
+              docker push $DOCKERHUB_USERNAME/frontend:latest
+            """
+          }
+        }
+        stage('reverse-proxy') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/reverse-proxy:latest ./reverse-proxy
+              docker push $DOCKERHUB_USERNAME/reverse-proxy:latest
+            """
+          }
+        }
+        stage('jenkins') {
+          steps {
+            sh """
+              docker build -t $DOCKERHUB_USERNAME/jenkins:latest ./jenkins
+              docker push $DOCKERHUB_USERNAME/jenkins:latest
+            """
+          }
+        }
+      }
+    }
+
+    stage('Docker Logout') {
+      steps {
+        sh 'docker logout'
+      }
+    }
+  }
 }

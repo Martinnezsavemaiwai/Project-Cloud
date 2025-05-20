@@ -22,7 +22,6 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -32,8 +31,6 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-    # ports:
-    #   - "9090:9090"
     expose:
       - "9090"
 
@@ -42,8 +39,6 @@ services:
     container_name: grafana
     networks:
       - microservice
-    # ports:
-    #   - "3000:3000"
     expose:
       - "3000"
     environment:
@@ -69,6 +64,7 @@ services:
 
   user-service:
     build: ./user-service
+    image: martinnezsavemaiwai/user-service:latest
     container_name: user-service
     restart: always
     networks:
@@ -96,6 +92,7 @@ services:
 
   recipe-service:
     build: ./recipe-service
+    image: martinnezsavemaiwai/recipe-service:latest
     container_name: recipe-service
     restart: always
     networks:
@@ -122,6 +119,7 @@ services:
 
   rating-service:
     build: ./rating-service
+    image: martinnezsavemaiwai/rating-service:latest
     container_name: rating-service
     restart: always
     networks:
@@ -148,6 +146,7 @@ services:
 
   favorite-service:
     build: ./favorite-service
+    image: martinnezsavemaiwai/favorite-service:latest
     container_name: favorite-service
     restart: always
     networks:
@@ -160,6 +159,7 @@ services:
 
   reverse-proxy:
     build: ./reverse-proxy
+    image: martinnezsavemaiwai/reverse-proxy:latest
     container_name: reverse-proxy
     restart: always
     networks:
@@ -172,6 +172,7 @@ services:
 
   frontend:
     build: ./frontend
+    image: martinnezsavemaiwai/frontend:latest
     container_name: frontend
     restart: always
     ports:
@@ -186,11 +187,11 @@ services:
       - webproxy
     volumes:
       - ./frontend:/app
-      - /app/node_modules 
+      - /app/node_modules
 
   jenkins:
     build: ./jenkins
-    image: jenkins
+    image: martinnezsavemaiwai/jenkins:latest
     container_name: jenkins
     ports:
       - "8081:8080"
@@ -202,6 +203,7 @@ services:
 
   api-gateway:
     build: ./api-gateway
+    image: martinnezsavemaiwai/api-gateway:latest
     container_name: api-gateway
     restart: always
     networks:
