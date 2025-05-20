@@ -1,18 +1,15 @@
-FROM jenkins/jenkins:lts
+FROM jenkins/jenkins:lts-jdk17
 
 USER root
 
-# ติดตั้ง Docker CLI
-RUN apt-get update && \
-    apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release && \
+ARG DOCKER_GID=999  # แก้เป็น GID docker group บน host
+
+RUN apt-get update && apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
-    $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
-    apt-get update && \
-    apt-get install -y docker-ce-cli docker-compose-plugin
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && apt-get install -y docker-ce-cli docker-compose-plugin
 
-# ให้ user jenkins ใช้ docker ได้ (โดยไม่ต้องเป็น root)
-RUN groupadd -f docker && usermod -aG docker jenkins
+RUN groupadd -g ${DOCKER_GID} docker || true && \
+    usermod -aG docker jenkins
 
-# กลับไปใช้ user jenkins
 USER jenkins

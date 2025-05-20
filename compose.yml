@@ -199,6 +199,8 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      - //./pipe/docker_engine://./pipe/docker_engine
+
     restart: unless-stopped
 
   api-gateway:
