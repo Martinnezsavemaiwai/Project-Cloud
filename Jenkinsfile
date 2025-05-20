@@ -8,11 +8,13 @@ pipeline {
 
   stages {
     stage('Docker Login') {
-      steps {
-        script {
-          sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                sh '''
+                    echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
+                '''
+            }
         }
-      }
     }
 
     stage('Build & Push Images') {
