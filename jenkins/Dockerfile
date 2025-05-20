@@ -19,5 +19,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
 
 # ให้สิทธิ์ Jenkins รัน docker
 RUN usermod -aG docker jenkins
+RUN getent group docker || groupadd docker && usermod -aG docker jenkins
 
 USER jenkins
